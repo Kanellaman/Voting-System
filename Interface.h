@@ -1,4 +1,3 @@
-/* i n e t _ s t r _ s e r v e r . c : Internet stream sockets server */
 #include <stdio.h>
 #include <sys/wait.h>  /*sockets*/
 #include <sys/types.h> /*sockets*/
