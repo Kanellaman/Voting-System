@@ -10,6 +10,7 @@
 #include <ctype.h>     /*toupper*/
 #include <signal.h>    /*signal */
 #include <string.h>
+#include <pthread.h>
 
 /* Server */
 void child_server(int newsock);
