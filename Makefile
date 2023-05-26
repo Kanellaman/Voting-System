@@ -1,23 +1,26 @@
 # Compiler
 CC = gcc
 
-#.c files
-Files = poller.c Functions.c
+# .c files
+Files1 = poller.c Functions.c
+Files2 = pollerclient.c Functions.c
 
-#.o objects
-OBJS = poller.o Functions.o
+# .o objects
+OBJS1 = poller.o Functions.o
+OBJS2 = pollerclient.o Functions.o
 
-#Executable
-EXEC = poller
+# Executable
+EXEC1 = poller
+EXEC2 = pollerclient
 
 # Create executable
-$(EXEC): $(OBJS) $(Files)
-	$(CC) -g -Wall $(OBJS) -o $(EXEC) -lpthread
+$(EXEC1): $(OBJS1) $(Files1)
+	$(CC) -g -Wall $(OBJS1) -o $(EXEC1) -lpthread
 
-# Execute
-run: $(EXEC)
-	./$(EXEC)
+$(EXEC2): $(OBJS2) $(Files2)
+	$(CC) -g -Wall $(OBJS2) -o $(EXEC2) -lpthread
 
 # Clear
 clean:
-	rm -f $(EXEC) $(OBJS)
+	rm -f $(EXEC1) $(OBJS1)
+	rm -f $(EXEC2) $(OBJS2)
