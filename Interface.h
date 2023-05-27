@@ -11,11 +11,5 @@
 #include <string.h>
 #include <pthread.h>
 
-/* Server */
-void child_server(int newsock);
-void sigchld_handler(int sig);
-
-/* Client */
-
 /* Both */
 void perror_exit(char *message);

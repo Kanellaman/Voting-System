@@ -1,39 +1,91 @@
 #include "Interface.h"
+#include "InterfaceServer.h"
 
+void sig_handler(int sig)
+{
+    flag = 1;
+    for (int i = 0; i < threads; i++)
+        pthread_cond_signal(&cond);
+    for (int i = 0; i < threads; i++)
+    {
+        if (pthread_join(thread_id[i], NULL) != 0)
+        {
+            perror("Failed to join thread\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+    close(sock);
+    deletes(&clients);
+    pthread_mutex_destroy(&mutex);
+    pthread_cond_destroy(&cond);
+    free(thread_id);
+    exit(0);
+}
 int main(int argc, char **argv)
 {
+    flag = 0;
     if (argc != 6)
     {
         printf("Not enough arguments, try poller [portnum] [numWorkerthreads] [bufferSize] [poll-log][poll-stats]\n");
         exit(-1);
     }
-    int port = atoi(argv[1]), threads = atoi(argv[2]), buffersize = atoi(argv[3]), sock, newsock;
-    char *log = malloc(strlen(argv[4]) * sizeof(char) + 1), *stats = malloc(strlen(argv[5]) * sizeof(char) + 1), buf[1024];
-    strcpy(log, argv[4]);
-    strcpy(stats, argv[5]);
+    int port = atoi(argv[1]), buffersize = atoi(argv[3]), newsock;
+    char *log = argv[4], *stats = argv[5], buf[1024];
+    threads = atoi(argv[2]);
+    init(&clients, buffersize);
+    signal(SIGINT, sig_handler);
+    pthread_mutex_init(&mutex, NULL);
+    pthread_cond_init(&cond, NULL);
+    thread_id = malloc(threads * sizeof(pthread_t));
+
     struct sockaddr_in server, client;
-    socklen_t clientlen;
+    socklen_t clientlen = sizeof(struct sockaddr_in);
     struct sockaddr *serverptr = (struct sockaddr *)&server;
     struct sockaddr *clientptr = (struct sockaddr *)&client;
-    struct hostent *rem;
-
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-        perror_exit(" socket ");
+        perror_exit("socket");
     server.sin_family = AF_INET; /* Internet domain */
     server.sin_addr.s_addr = htonl(INADDR_ANY);
     server.sin_port = htons(port); /* The given port */
 
     if (bind(sock, serverptr, sizeof(server)) < 0)
-        perror_exit(" bind ");
+        perror_exit("bind");
     if (listen(sock, 5) < 0)
-        perror_exit(" listen ");
+        perror_exit("listen");
 
-    printf(" Listening for connections to port %d \n ", port);
+    printf("Listening for connections to port %d\n", port);
 
-    if ((newsock = accept(sock, clientptr, &clientlen)) < 0)
-        perror_exit("accept");
-    printf(" Accepted connection\n ");
-    close(newsock); /* parent closes socket to client */
+    for (int i = 0; i < threads; i++)
+    {
+        if (pthread_create(&thread_id[i], NULL, serve, NULL) != 0)
+        {
+            perror("Failed to create thread\n");
+            return EXIT_FAILURE;
+        }
+    }
+    do
+    {
+        if ((newsock = accept(sock, clientptr, &clientlen)) < 0)
+        {
+            perror("accept");
+        }
+        pthread_mutex_lock(&mutex);
+        add(&clients, newsock, clientptr);
+        pthread_mutex_unlock(&mutex);
+
+    } while (1);
+    /* for (int i = 0; i < threads; i++)
+    {
+        if (pthread_join(thread_id[i], NULL) != 0)
+        {
+            perror("Failed to join thread\n");
+            return EXIT_FAILURE;
+        }
+    }
     close(sock);
+    free(thread_id);
+    deletes(&clients);
+    pthread_mutex_destroy(&mutex);
+    pthread_cond_destroy(&cond);*/
     return 0;
 }

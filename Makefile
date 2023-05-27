@@ -23,7 +23,10 @@ $(EXEC2): $(OBJS2) $(Files2)
 	$(CC) -g -Wall $(OBJS2) -o $(EXEC2) -lpthread
 
 poll: $(EXEC1)
-	./poller $(ARGS)
+	./$(EXEC1) $(ARGS)
+
+memory: $(EXEC1)
+	valgrind --leak-check=full --track-origins=yes ./$(EXEC1) $(ARGS)
 
 # Clear
 clean:
