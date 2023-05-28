@@ -1,13 +1,17 @@
-struct waiting clients;
 pthread_mutex_t mutex;
-pthread_t *thread_id;
-int sock,threads,flag;
+pthread_mutex_t mutex1;
+pthread_cond_t buff;
 pthread_cond_t cond;
+pthread_t *thread_id;
+
+int sock, threads, flag;
+int fdlog, fdstats;
+
+struct waiting clients;
 typedef struct Request *req;
 struct Request
 {
     int socket;
-    struct sockaddr *client;
     req next;
 };
 struct waiting

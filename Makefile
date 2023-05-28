@@ -13,7 +13,7 @@ OBJS2 = pollerclient.o Functions.o
 EXEC1 = poller
 EXEC2 = pollerclient
 
-ARGS = 9002 4 8 log.txt stats.txt
+ARGS = 9000 4 8 log.txt stats.txt
 
 # Create executable
 $(EXEC1): $(OBJS1) $(Files1) $(EXEC2)

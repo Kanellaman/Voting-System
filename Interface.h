@@ -10,6 +10,8 @@
 #include <signal.h>    /*signal */
 #include <string.h>
 #include <pthread.h>
+#include <fcntl.h>
+
 
 /* Both */
-void perror_exit(char *message);
+void perror_exit(char *message, int socket, void *dealloc);

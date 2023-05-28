@@ -1,28 +1,51 @@
 #include "Interface.h"
 #include "InterfaceServer.h"
+#include "InterfaceClient.h"
 void *serve(void *arg)
 {
+    long i = (long)arg;
+    printf("Hello from%ld\n", i);
     while (1)
     {
+        char name[1024], party[1024];
         pthread_mutex_lock(&mutex);
-        if (clients.count == 0)
+        while (clients.count == 0 && !flag)
             pthread_cond_wait(&cond, &mutex);
-        if (flag == 1)
+        if (flag)
         {
             pthread_mutex_unlock(&mutex);
             return NULL;
         }
+        printf("%d-By %ld\n", clients.count, i);
         req client = pop(&clients);
-        if (client == NULL)
-            continue;
         pthread_mutex_unlock(&mutex);
-        const char *response = "SEND NAME PLEASE";
+        char response[17] = "SEND NAME PLEASE";
 
         if (write(client->socket, response, strlen(response) + 1) < 0)
+            perror_exit("write", client->socket, client);
+
+        if (read(client->socket, name, sizeof(name)) < 0)
+            perror_exit("read", client->socket, client);
+
+        int found = 0;
+        if (found)
+            strcpy(response, "ALREADY VOTED");
+        else
+            strcpy(response, "SEND VOTE PLEASE");
+        if (write(client->socket, response, strlen(response) + 1) < 0)
+            perror_exit("write", client->socket, client);
+
+        if (!found)
         {
-            perror("write");
-            close(client->socket);
-            return NULL;
+            if (read(client->socket, party, sizeof(party)) < 0)
+                perror_exit("read", client->socket, client);
+
+            strcpy(response, "VOTE for Party ");
+            strcat(response, party);
+            strcat(response, " RECORDED\0");
+
+            if (write(client->socket, response, strlen(response) + 1) < 0)
+                perror_exit("write", client->socket, client);
         }
         close(client->socket);
         free(client);
@@ -31,8 +54,11 @@ void *serve(void *arg)
 }
 
 /* Wait for all dead child processes */
-void perror_exit(char *message)
+void perror_exit(char *message, int socket, void *dealloc)
 {
+    free(dealloc);
+    if (socket > 0)
+        close(socket);
     perror(message);
     exit(EXIT_FAILURE);
 }
@@ -47,10 +73,12 @@ void init(waits clients, int buffersize)
 
 void add(waits clients, int socket, struct sockaddr *client)
 {
-    if (clients->count + 1 == clients->buffersize)
+    if (clients->count + 1 > clients->buffersize)
+    {
+        printf("Threw one");
         return;
+    }
     req new = malloc(sizeof(struct Request));
-    new->client = client;
     new->socket = socket;
     new->next = NULL;
     if (clients->head == NULL)
@@ -92,7 +120,40 @@ req pop(waits clients)
     if (poped->next == NULL)
         clients->tail = NULL;
     clients->count--;
+    if (clients->count + 1 == clients->buffersize)
+        pthread_cond_signal(&buff);
     clients->head = poped->next;
 
     return poped;
+}
+int search(name votes, char *voter)
+{
+    while (votes != NULL)
+    {
+        if (!strcmp(votes->voter, voter))
+            return 1;
+        votes = votes->next;
+    }
+    return 0;
+}
+name del(name votes)
+{
+    name current = votes, next = NULL;
+    while (current != NULL)
+    {
+        next = current->next;
+        free(current->voter);
+        free(current);
+        current = next;
+    }
+    return NULL;
+}
+name insert(name votes, char *voter)
+{
+    name new = malloc(sizeof(struct names));
+    new->voter = malloc(strlen(voter) * sizeof(char) + 1);
+    strcpy(new->voter, voter);
+    if (votes != NULL)
+        new->next = votes;
+    return new;
 }

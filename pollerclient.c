@@ -1,8 +1,49 @@
 #include "Interface.h"
+#include "InterfaceClient.h"
+
 void *print_line(void *line)
 {
     char *line_text = (char *)line;
-    printf("%s", line_text);
+    int sock;
+    char buf[1024];
+    char *saveptr;
+    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+        perror_exit("socket", -1, line_text);
+    /* Initiate connection */
+    if (connect(sock, serverptr, sizeof(struct sockaddr_in)) < 0)
+        perror_exit("connect", sock, line_text);
+
+    if (read(sock, buf, sizeof(buf)) < 0)
+        perror_exit("read", sock, line_text);
+    if (strcmp(buf, "SEND NAME PLEASE"))
+    {
+        printf("Received wrong message from server %s", buf);
+        close(sock);
+        free(line_text);
+        return NULL;
+    }
+    char *response = strtok_r(line_text, " ", &saveptr);
+
+    if (write(sock, response, strlen(response) + 1) < 0)
+        perror_exit("write", sock, line_text);
+
+    if (read(sock, buf, sizeof(buf)) < 0)
+        perror_exit("read", sock, line_text);
+
+    if (!strcmp(buf, "ALREADY VOTED"))
+    {
+        free(line_text);
+        close(sock);
+        return NULL;
+    }
+    response = strtok_r(NULL, " \n", &saveptr);
+    printf("%s", response);
+    if (write(sock, response, strlen(response) + 1) < 0)
+        perror_exit("write", sock, line_text);
+    if (read(sock, buf, sizeof(buf)) < 0)
+        perror_exit("read", sock, line_text);
+    close(sock);
+    free(line_text);
     return NULL;
 }
 int main(int argc, char **argv)
@@ -13,12 +54,10 @@ int main(int argc, char **argv)
         printf("Not enough arguments, try  pollSwayer [serverName] [portNum] [inputFile.txt]\n");
         exit(-1);
     }
+    port = atoi(argv[2]);
     char line[1024];
-    int port = atoi(argv[2]), sock, i, num_lines;
-    char *name = argv[1], *stats = argv[3], buf[256];
-    struct sockaddr_in server;
-    struct sockaddr *serverptr = (struct sockaddr *)&server;
-    struct hostent *rem;
+    int i, num_lines = 0;
+    stats = argv[3];
     FILE *file;
     file = fopen(stats, "r");
     if (file == NULL)
@@ -28,12 +67,22 @@ int main(int argc, char **argv)
     }
     while (fgets(line, sizeof(line), file) != NULL)
     {
-        if (strcmp(line, "\n"))
+        if (strcmp(line, "\n") != 0)
             num_lines++;
     }
-
+    serverptr = (struct sockaddr *)&server;
+    if ((rem = gethostbyname(argv[1])) == NULL)
+    {
+        herror(" gethostbyname ");
+        exit(1);
+    }
+    server.sin_family = AF_INET;   /* Internet domain */
+    server.sin_port = htons(port); /* Server port */
+    memcpy(&server.sin_addr, rem->h_addr, rem->h_length);
     // Reset the file position indicator to the beginning
     fseek(file, 0, SEEK_SET);
+    printf("%d", num_lines);
+
     thread_id = (pthread_t *)malloc(num_lines * sizeof(pthread_t));
     if (thread_id == NULL)
     {
@@ -44,8 +93,9 @@ int main(int argc, char **argv)
     for (i = 0; i < num_lines; i++)
     {
         fgets(line, sizeof(line), file);
-
-        if (pthread_create(&thread_id[i], NULL, print_line, line) != 0)
+        char *text = malloc(strlen(line) * sizeof(char) + 1);
+        strcpy(text, line);
+        if (pthread_create(&thread_id[i], NULL, print_line, text) != 0)
         {
             printf("Error creating thread.\n");
             fclose(file);
@@ -59,40 +109,6 @@ int main(int argc, char **argv)
     }
     fclose(file);
     free(thread_id);
-    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-    {
-        perror("socket");
-        exit(-1);
-    }
-    if ((rem = gethostbyname(name)) == NULL)
-    {
-        herror(" gethostbyname ");
-        exit(1);
-    }
-    server.sin_family = AF_INET;   /* Internet domain */
-    server.sin_port = htons(port); /* Server port */
-    memcpy(&server.sin_addr, rem->h_addr, rem->h_length);
-    /* Initiate connection */
-    if (connect(sock, serverptr, sizeof(server)) < 0)
-    {
-        perror_exit(" connect ");
-        close(sock);
-        exit(-1);
-    }
 
-    if (read(sock, buf, sizeof(buf)) <= 0)
-    {
-        printf("Error receiving message from server\n");
-        close(sock);
-        exit(-1);
-    }
-    if (strcmp(buf, "SEND NAME PLEASE"))
-    {
-        printf("Received wrong message from server %s", buf);
-        close(sock);
-        exit(-1);
-    }
-    printf("Ola good\n");
-    close(sock);
     return 0;
 }
