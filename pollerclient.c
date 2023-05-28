@@ -109,6 +109,14 @@ int main(int argc, char **argv)
     }
     fclose(file);
     free(thread_id);
-
+    name test = NULL;
+    test = insert(test, "Kostakhs");
+    test = insert(test, "Liakos");
+    test = insert(test, "Giorgos");
+    int f = search(test, "Kostakhs");
+    printf("Found? %d\n", f);
+    f = search(test, "Kostak");
+    printf("Found? %d\n", f);
+    test = del(test);
     return 0;
 }

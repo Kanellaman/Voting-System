@@ -54,14 +54,14 @@ int main(int argc, char **argv)
     struct sockaddr *serverptr = (struct sockaddr *)&server;
     struct sockaddr *clientptr = (struct sockaddr *)&client;
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-        perror_exit("socket");
+        perror_exit("socket", -1, NULL);
     server.sin_family = AF_INET; /* Internet domain */
     server.sin_addr.s_addr = htonl(INADDR_ANY);
     server.sin_port = htons(port); /* The given port */
     if (bind(sock, serverptr, sizeof(server)) < 0)
-        perror_exit("bind");
+        perror_exit("bind", sock, NULL);
     if (listen(sock, 128) < 0)
-        perror_exit("listen");
+        perror_exit("listen", sock, NULL);
 
     printf("Listening for connections to port %d\n", port);
 

@@ -56,7 +56,8 @@ void *serve(void *arg)
 /* Wait for all dead child processes */
 void perror_exit(char *message, int socket, void *dealloc)
 {
-    free(dealloc);
+    if (dealloc != NULL)
+        free(dealloc);
     if (socket > 0)
         close(socket);
     perror(message);
