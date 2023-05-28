@@ -48,7 +48,6 @@ void *print_line(void *line)
 }
 int main(int argc, char **argv)
 {
-    pthread_mutex_init(&mutex1, NULL);
     pthread_t *thread_id;
     if (argc != 4)
     {
@@ -110,6 +109,5 @@ int main(int argc, char **argv)
     }
     fclose(file);
     free(thread_id);
-    pthread_mutex_destroy(&mutex1);
     return 0;
 }

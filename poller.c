@@ -15,6 +15,7 @@ void sig_handler(int sig)
             exit(EXIT_FAILURE);
         }
     }
+    votes = del(votes);
     close(sock);
     deletes(&clients);
     pthread_mutex_destroy(&mutex);
@@ -25,6 +26,7 @@ void sig_handler(int sig)
 }
 int main(int argc, char **argv)
 {
+    votes = NULL;
     flag = 0;
     if (argc != 6)
     {
@@ -43,6 +45,7 @@ int main(int argc, char **argv)
     init(&clients, buffersize);
     // signal(SIGINT, sig_handler);
     pthread_mutex_init(&mutex, NULL);
+    pthread_mutex_init(&mutex1, NULL);
     pthread_cond_init(&cond, NULL);
     pthread_cond_init(&buff, NULL);
     thread_id = malloc(threads * sizeof(pthread_t));

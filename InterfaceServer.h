@@ -4,7 +4,6 @@ pthread_cond_t cond;
 pthread_t *thread_id;
 pthread_mutex_t mutex1;
 
-name votes;
 int sock, threads, flag;
 int fdlog, fdstats;
 
@@ -29,6 +28,7 @@ struct names
     name next;
 };
 
+name votes;
 /* Server */
 int search(name votes, char *voter);
 name del(name votes);

@@ -27,11 +27,16 @@ void *serve(void *arg)
         if (read(client->socket, name, sizeof(name)) < 0)
             perror_exit("read", client->socket, client);
 
-        int found = 0;
+        pthread_mutex_lock(&mutex1);
+        int found = search(votes, name);
         if (found)
             strcpy(response, "ALREADY VOTED");
         else
+        {
+            votes = insert(votes, name);
             strcpy(response, "SEND VOTE PLEASE");
+        }
+        pthread_mutex_unlock(&mutex1);
         if (write(client->socket, response, strlen(response) + 1) < 0)
             perror_exit("write", client->socket, client);
 
