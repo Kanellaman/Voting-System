@@ -129,6 +129,8 @@ req pop(waits clients)
 }
 int search(name votes, char *voter)
 {
+    if (votes == NULL)
+        return 0;
     while (votes != NULL)
     {
         if (!strcmp(votes->voter, voter))
@@ -139,6 +141,8 @@ int search(name votes, char *voter)
 }
 name del(name votes)
 {
+    if (votes == NULL)
+        return NULL;
     name current = votes, next = NULL;
     while (current != NULL)
     {
@@ -154,6 +158,7 @@ name insert(name votes, char *voter)
     name new = malloc(sizeof(struct names));
     new->voter = malloc(strlen(voter) * sizeof(char) + 1);
     strcpy(new->voter, voter);
+    new->next = NULL;
     if (votes != NULL)
         new->next = votes;
     return new;

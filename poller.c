@@ -19,7 +19,6 @@ void sig_handler(int sig)
     deletes(&clients);
     pthread_mutex_destroy(&mutex);
     pthread_cond_destroy(&cond);
-    pthread_mutex_destroy(&mutex1);
     pthread_cond_destroy(&buff);
     free(thread_id);
     exit(0);
@@ -45,7 +44,6 @@ int main(int argc, char **argv)
     // signal(SIGINT, sig_handler);
     pthread_mutex_init(&mutex, NULL);
     pthread_cond_init(&cond, NULL);
-    pthread_mutex_init(&mutex1, NULL);
     pthread_cond_init(&buff, NULL);
     thread_id = malloc(threads * sizeof(pthread_t));
 
