@@ -5,11 +5,7 @@
 
 # Αγνοούμε όλα τα αρχεία (όχι τα directories)
 *
-input.txt
-log.txt
-stats.txt
 !*/
-test.c
 # Εκτός από τα παρακάτω
 !*.c
 !*.h
@@ -17,6 +13,5 @@ test.c
 !Makefile
 !.gitignore
 !README.md
-!*.txt
 !*.pdf
 !*.so
