@@ -28,15 +28,14 @@ void *serve(void *arg)
             perror_exit("read", client->socket, client);
 
         pthread_mutex_lock(&mutex1);
-        int found = search(votes, name);
+        int found = search(voters, name);
         if (found)
             strcpy(response, "ALREADY VOTED");
         else
         {
-            votes = insert(votes, name);
+            voters = insert(voters, name);
             strcpy(response, "SEND VOTE PLEASE");
         }
-        pthread_mutex_unlock(&mutex1);
         if (write(client->socket, response, strlen(response) + 1) < 0)
             perror_exit("write", client->socket, client);
 
@@ -45,13 +44,14 @@ void *serve(void *arg)
             if (read(client->socket, party, sizeof(party)) < 0)
                 perror_exit("read", client->socket, client);
 
+            votes = in(votes, name, party);
             strcpy(response, "VOTE for Party ");
             strcat(response, party);
             strcat(response, " RECORDED\0");
-
             if (write(client->socket, response, strlen(response) + 1) < 0)
                 perror_exit("write", client->socket, client);
         }
+        pthread_mutex_unlock(&mutex1);
         close(client->socket);
         free(client);
     }
@@ -132,23 +132,23 @@ req pop(waits clients)
 
     return poped;
 }
-int search(name votes, char *voter)
+int search(name voters, char *voter)
 {
-    if (votes == NULL)
+    if (voters == NULL)
         return 0;
-    while (votes != NULL)
+    while (voters != NULL)
     {
-        if (!strcmp(votes->voter, voter))
+        if (!strcmp(voters->voter, voter))
             return 1;
-        votes = votes->next;
+        voters = voters->next;
     }
     return 0;
 }
-name del(name votes)
+void del(name voters)
 {
-    if (votes == NULL)
-        return NULL;
-    name current = votes, next = NULL;
+    if (voters == NULL)
+        return;
+    name current = voters, next = NULL;
     while (current != NULL)
     {
         next = current->next;
@@ -156,15 +156,80 @@ name del(name votes)
         free(current);
         current = next;
     }
-    return NULL;
 }
-name insert(name votes, char *voter)
+name insert(name voters, char *voter)
 {
     name new = malloc(sizeof(struct names));
     new->voter = malloc(strlen(voter) * sizeof(char) + 1);
     strcpy(new->voter, voter);
     new->next = NULL;
-    if (votes != NULL)
-        new->next = votes;
+    if (voters != NULL)
+        new->next = voters;
     return new;
+}
+void print(parties votes)
+{
+    while (votes != NULL)
+    {
+        if (votes->count != -1)
+            fprintf(fdstats, "%s  %d\n", votes->party, votes->count);
+        fprintf(fdlog, "%s  %s\n", votes->name, votes->party);
+
+        votes = votes->next;
+    }
+}
+parties in(parties votes, char *name, char *party)
+{
+    parties new = malloc(sizeof(struct Party)), prev, tmp = votes, last;
+    int found = 0;
+    new->name = malloc(strlen(name) * sizeof(char) + 1);
+    strcpy(new->name, name);
+    new->next = NULL;
+    new->count = -1;
+    if (votes == NULL)
+    {
+        new->count = 1;
+        new->party = malloc(strlen(party) * sizeof(char) + 1);
+        strcpy(new->party, party);
+        return new;
+    }
+    last = votes;
+    while (tmp != NULL && tmp->count != -1)
+    {
+        prev = tmp;
+        if (!strcmp(tmp->party, party))
+        {
+            found = 1;
+            tmp->count++;
+            last = tmp;
+        }
+        tmp = tmp->next;
+    }
+    new->next = prev->next;
+    prev->next = new;
+    if (!found)
+    {
+        new->count = 1;
+        new->party = malloc(strlen(party) * sizeof(char) + 1);
+        strcpy(new->party, party);
+    }
+    else
+    {
+        new->party = last->party;
+    }
+    return votes;
+}
+
+void dele(parties votes)
+{
+    parties current = votes, next;
+    while (current != NULL)
+    {
+        next = current->next;
+        free(current->name);
+        if (current->count != -1)
+            free(current->party);
+        free(current);
+        current = next;
+    }
 }

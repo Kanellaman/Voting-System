@@ -15,17 +15,23 @@ void sig_handler(int sig)
             exit(EXIT_FAILURE);
         }
     }
-    votes = del(votes);
+    print(votes);
+
+    dele(votes);
+    del(voters);
     close(sock);
     deletes(&clients);
     pthread_mutex_destroy(&mutex);
     pthread_cond_destroy(&cond);
     pthread_cond_destroy(&buff);
     free(thread_id);
+    fclose(fdlog);
+    fclose(fdstats);
     exit(0);
 }
 int main(int argc, char **argv)
 {
+    voters = NULL;
     votes = NULL;
     flag = 0;
     if (argc != 6)
@@ -35,8 +41,9 @@ int main(int argc, char **argv)
     }
     int port = atoi(argv[1]), buffersize = atoi(argv[3]), newsock;
     char *logs = argv[4], *stats = argv[5], buf[1024];
-    fdlog = open(logs, O_WRONLY | O_TRUNC | O_CREAT, 0644);
-    if (fdlog == -1)
+    fdlog = fopen(logs, "w");
+    fdstats = fopen(stats, "w");
+    if (fdlog == NULL || fdstats == NULL)
     { /* If an error comes up while opening a file print error */
         perror("open");
         return -1;
