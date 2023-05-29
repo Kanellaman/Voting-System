@@ -109,5 +109,6 @@ int main(int argc, char **argv)
     }
     fclose(file);
     free(thread_id);
+
     return 0;
 }

@@ -3,6 +3,7 @@ pthread_cond_t buff;
 pthread_cond_t cond;
 pthread_t *thread_id;
 pthread_mutex_t mutex1;
+pthread_mutex_t mutex2;
 
 int sock, threads, flag;
 FILE *fdlog, *fdstats;

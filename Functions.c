@@ -36,6 +36,7 @@ void *serve(void *arg)
             voters = insert(voters, name);
             strcpy(response, "SEND VOTE PLEASE");
         }
+        pthread_mutex_unlock(&mutex1);
         if (write(client->socket, response, strlen(response) + 1) < 0)
             perror_exit("write", client->socket, client);
 
@@ -43,15 +44,16 @@ void *serve(void *arg)
         {
             if (read(client->socket, party, sizeof(party)) < 0)
                 perror_exit("read", client->socket, client);
+            pthread_mutex_lock(&mutex2);
 
             votes = in(votes, name, party);
+            pthread_mutex_unlock(&mutex2);
             strcpy(response, "VOTE for Party ");
             strcat(response, party);
             strcat(response, " RECORDED\0");
             if (write(client->socket, response, strlen(response) + 1) < 0)
                 perror_exit("write", client->socket, client);
         }
-        pthread_mutex_unlock(&mutex1);
         close(client->socket);
         free(client);
     }
@@ -173,7 +175,7 @@ void print(parties votes)
     {
         if (votes->count != -1)
             fprintf(fdstats, "%s  %d\n", votes->party, votes->count);
-        fprintf(fdlog, "%s  %s\n", votes->name, votes->party);
+        fprintf(fdlog, "%s  %d   %s\n", votes->party, votes->count, votes->name);
 
         votes = votes->next;
     }

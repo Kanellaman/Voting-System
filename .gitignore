@@ -5,6 +5,9 @@
 
 # Αγνοούμε όλα τα αρχεία (όχι τα directories)
 *
+input.txt
+log.txt
+stats.txt
 !*/
 test.c
 # Εκτός από τα παρακάτω

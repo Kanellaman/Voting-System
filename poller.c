@@ -16,12 +16,13 @@ void sig_handler(int sig)
         }
     }
     print(votes);
-
     dele(votes);
     del(voters);
     close(sock);
     deletes(&clients);
     pthread_mutex_destroy(&mutex);
+    pthread_mutex_destroy(&mutex1);
+    pthread_mutex_destroy(&mutex2);
     pthread_cond_destroy(&cond);
     pthread_cond_destroy(&buff);
     free(thread_id);
@@ -50,9 +51,9 @@ int main(int argc, char **argv)
     }
     threads = atoi(argv[2]);
     init(&clients, buffersize);
-    // signal(SIGINT, sig_handler);
     pthread_mutex_init(&mutex, NULL);
     pthread_mutex_init(&mutex1, NULL);
+    pthread_mutex_init(&mutex2, NULL);
     pthread_cond_init(&cond, NULL);
     pthread_cond_init(&buff, NULL);
     thread_id = malloc(threads * sizeof(pthread_t));
@@ -73,6 +74,7 @@ int main(int argc, char **argv)
 
     printf("Listening for connections to port %d\n", port);
 
+    signal(SIGINT, SIG_IGN); // Ignore SIGINT in all threads except the main thread
     for (long i = 0; i < threads; i++)
     {
         if (pthread_create(&thread_id[i], NULL, serve, (void *)i) != 0)
@@ -81,7 +83,7 @@ int main(int argc, char **argv)
             return EXIT_FAILURE;
         }
     }
-    signal(SIGINT, SIG_IGN); // Ignore SIGINT in all threads except the main thread
+    // signal(SIGINT, sig_handler);
     struct sigaction sa;
     sa.sa_handler = sig_handler;
     sigemptyset(&sa.sa_mask);
