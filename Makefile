@@ -30,12 +30,7 @@ $(EXEC2): $(OBJS2) $(Files2) $(InterfaceClient)
 # Make all files
 all: $(EXEC1) $(EXEC2)
 
-Poller: $(EXEC1)
-	./$(EXEC1) $(ARGS1)
-
-PollSwayer: $(EXEC2)
-	./$(EXEC2) $(ARGS2)
-
+# Check for memory leaks
 memory-poller: $(EXEC1)
 	valgrind --leak-check=full --track-origins=yes ./$(EXEC1) $(ARGS1)
 

@@ -33,7 +33,7 @@ int main(int argc, char **argv)
 {
     if (argc != 6)
     {
-        printf("Not enough arguments, try poller [portnum] [numWorkerthreads] [bufferSize] [poll-log][poll-stats]\n");
+        printf("Not enough arguments, try $poller [portnum] [numWorkerthreads] [bufferSize] [poll-log][poll-stats]\n");
         exit(-1);
     }
     int port = atoi(argv[1]), buffersize = atoi(argv[3]), newsock;

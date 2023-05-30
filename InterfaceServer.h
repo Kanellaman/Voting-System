@@ -22,9 +22,8 @@ struct names
 };
 
 struct Party
-{ /* Store the number of votes and the voters so that are printed at the proper output files*/
+{ /* Store the number of votes so that are printed at the proper output file*/
     char *party;
-    char *name;
     int count;
     parties next;
 };
@@ -40,7 +39,7 @@ pthread_t *thread_id;
 int sock, threads, flag;
 FILE *fdlog, *fdstats; // Input-Output files
 
-/* See typedefs and structs' comments */
+/* Ckeck typedefs and structs' comments */
 struct waiting clients;
 name voters;
 parties votes;
@@ -57,6 +56,6 @@ name insert(name votes, char *voter);
 int search(name votes, char *voter);
 void del(name votes);
 
-parties in(parties votes, char *name, char *party);
+parties in(parties votes, char *party);
 void print(parties votes);
 void dele(parties votes);
