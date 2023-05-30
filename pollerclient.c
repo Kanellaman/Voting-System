@@ -5,30 +5,36 @@ void *print_line(void *line)
 {
     char *line_text = (char *)line;
     int sock;
-    char buf[1024];
-    char *saveptr;
+    char buf[1024] = "random";
+    char *saveptr = NULL;
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-        perror_exit("socket", -1, line_text);
+        return perror_exit("socket", -1, line_text);
     /* Initiate connection */
     if (connect(sock, serverptr, sizeof(struct sockaddr_in)) < 0)
-        perror_exit("connect", sock, line_text);
+        return perror_exit("connect", sock, line_text);
 
-    if (read(sock, buf, sizeof(buf)) < 0)
-        perror_exit("read", sock, line_text);
+    if (read(sock, buf, sizeof(buf)) == -1)
+        return perror_exit("read", sock, line_text);
     if (strcmp(buf, "SEND NAME PLEASE"))
     {
-        printf("Received wrong message from server %s", buf);
         close(sock);
         free(line_text);
         return NULL;
     }
     char *response = strtok_r(line_text, " ", &saveptr);
-
-    if (write(sock, response, strlen(response) + 1) < 0)
-        perror_exit("write", sock, line_text);
-
-    if (read(sock, buf, sizeof(buf)) < 0)
-        perror_exit("read", sock, line_text);
+    char *rest = strtok_r(NULL, " ", &saveptr);
+    char *name = malloc((strlen(response) + 1 + strlen(rest) + 1) * sizeof(char));
+    strcpy(name, response);
+    strcat(name, " ");
+    strcat(name, rest);
+    if (write(sock, name, strlen(name) + 1) == -1)
+    {
+        free(name);
+        return perror_exit("write", sock, line_text);
+    }
+    free(name);
+    if (read(sock, buf, sizeof(buf)) == -1)
+        return perror_exit("read", sock, line_text);
 
     if (!strcmp(buf, "ALREADY VOTED"))
     {
@@ -37,11 +43,10 @@ void *print_line(void *line)
         return NULL;
     }
     response = strtok_r(NULL, " \n", &saveptr);
-    printf("%s", response);
-    if (write(sock, response, strlen(response) + 1) < 0)
-        perror_exit("write", sock, line_text);
-    if (read(sock, buf, sizeof(buf)) < 0)
-        perror_exit("read", sock, line_text);
+    if (write(sock, response, strlen(response) + 1) == -1)
+        return perror_exit("write", sock, line_text);
+    if (read(sock, buf, sizeof(buf)) == -1)
+        return perror_exit("read", sock, line_text);
     close(sock);
     free(line_text);
     return NULL;
@@ -67,8 +72,7 @@ int main(int argc, char **argv)
     }
     while (fgets(line, sizeof(line), file) != NULL)
     {
-        if (strcmp(line, "\n") != 0)
-            num_lines++;
+        num_lines++;
     }
     serverptr = (struct sockaddr *)&server;
     if ((rem = gethostbyname(argv[1])) == NULL)
@@ -81,7 +85,6 @@ int main(int argc, char **argv)
     memcpy(&server.sin_addr, rem->h_addr, rem->h_length);
     // Reset the file position indicator to the beginning
     fseek(file, 0, SEEK_SET);
-    printf("%d", num_lines);
 
     thread_id = (pthread_t *)malloc(num_lines * sizeof(pthread_t));
     if (thread_id == NULL)

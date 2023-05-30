@@ -22,10 +22,10 @@ void *serve(void *arg)
         char response[17] = "SEND NAME PLEASE";
 
         if (write(client->socket, response, strlen(response) + 1) < 0)
-            perror_exit("write", client->socket, client);
+            return perror_exit("write", client->socket, client);
 
         if (read(client->socket, name, sizeof(name)) < 0)
-            perror_exit("read", client->socket, client);
+            return perror_exit("read", client->socket, client);
 
         pthread_mutex_lock(&mutex1);
         int found = search(voters, name);
@@ -38,21 +38,20 @@ void *serve(void *arg)
         }
         pthread_mutex_unlock(&mutex1);
         if (write(client->socket, response, strlen(response) + 1) < 0)
-            perror_exit("write", client->socket, client);
+            return perror_exit("write", client->socket, client);
 
         if (!found)
         {
             if (read(client->socket, party, sizeof(party)) < 0)
-                perror_exit("read", client->socket, client);
+                return perror_exit("read", client->socket, client);
             pthread_mutex_lock(&mutex2);
-
             votes = in(votes, name, party);
             pthread_mutex_unlock(&mutex2);
             strcpy(response, "VOTE for Party ");
             strcat(response, party);
             strcat(response, " RECORDED\0");
             if (write(client->socket, response, strlen(response) + 1) < 0)
-                perror_exit("write", client->socket, client);
+                return perror_exit("write", client->socket, client);
         }
         close(client->socket);
         free(client);
@@ -61,14 +60,14 @@ void *serve(void *arg)
 }
 
 /* Wait for all dead child processes */
-void perror_exit(char *message, int socket, void *dealloc)
+void *perror_exit(char *message, int socket, void *dealloc)
 {
     if (dealloc != NULL)
         free(dealloc);
     if (socket > 0)
         close(socket);
     perror(message);
-    exit(EXIT_FAILURE);
+    return NULL;
 }
 
 void init(waits clients, int buffersize)
@@ -174,8 +173,8 @@ void print(parties votes)
     while (votes != NULL)
     {
         if (votes->count != -1)
-            fprintf(fdstats, "%s  %d\n", votes->party, votes->count);
-        fprintf(fdlog, "%s  %d   %s\n", votes->party, votes->count, votes->name);
+            fprintf(fdstats, "%s %d\n", votes->party, votes->count);
+        fprintf(fdlog, "%s %s\n", votes->name, votes->party);
 
         votes = votes->next;
     }

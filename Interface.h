@@ -12,6 +12,5 @@
 #include <pthread.h>
 #include <fcntl.h>
 
-
 /* Both */
-void perror_exit(char *message, int socket, void *dealloc);
+void *perror_exit(char *message, int socket, void *dealloc);
