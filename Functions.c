@@ -1,29 +1,27 @@
 #include "Interface.h"
 #include "InterfaceServer.h"
 #include "InterfaceClient.h"
+
 void *serve(void *arg)
-{
-    long i = (long)arg;
-    printf("Hello from%ld\n", i);
+{ /* Function for server-threads */
     while (1)
     {
-        char name[1024], party[1024];
+        char name[1024], party[1024]; // Variables to store voter and party
         pthread_mutex_lock(&mutex);
-        while (clients.count == 0 && !flag)
+        while (clients.count == 0 && !flag) // Wait until there is someone to serve or you need to terminate imidiately(flag)
             pthread_cond_wait(&cond, &mutex);
         if (flag)
-        {
+        { /* Terminate-Command from sig_handler */
             pthread_mutex_unlock(&mutex);
             return NULL;
         }
-        printf("%d-By %ld\n", clients.count, i);
-        req client = pop(&clients);
+        req client = pop(&clients); // Get a client to serve
         pthread_mutex_unlock(&mutex);
         char response[17] = "SEND NAME PLEASE";
-
+        /* Send confirmation message */
         if (write(client->socket, response, strlen(response) + 1) < 0)
             return perror_exit("write", client->socket, client);
-
+        /* Receive voter name */
         if (read(client->socket, name, sizeof(name)) < 0)
             return perror_exit("read", client->socket, client);
 
@@ -37,11 +35,12 @@ void *serve(void *arg)
             strcpy(response, "SEND VOTE PLEASE");
         }
         pthread_mutex_unlock(&mutex1);
+        /* Send message for confirmation to proceed or decline of vote */
         if (write(client->socket, response, strlen(response) + 1) < 0)
             return perror_exit("write", client->socket, client);
 
         if (!found)
-        {
+        { /* Receive vote party if the voter has not voted again */
             if (read(client->socket, party, sizeof(party)) < 0)
                 return perror_exit("read", client->socket, client);
             pthread_mutex_lock(&mutex2);
@@ -50,18 +49,69 @@ void *serve(void *arg)
             strcpy(response, "VOTE for Party ");
             strcat(response, party);
             strcat(response, " RECORDED\0");
+            /* Send confirmation vote */
             if (write(client->socket, response, strlen(response) + 1) < 0)
                 return perror_exit("write", client->socket, client);
         }
-        close(client->socket);
-        free(client);
+        close(client->socket); // Close file descriptor
+        free(client);          // Free served client
     }
     return NULL;
 }
 
-/* Wait for all dead child processes */
-void *perror_exit(char *message, int socket, void *dealloc)
+void *send_vote(void *line)
 {
+    char *line_text = (char *)line;
+    int sock;
+    char buf[1024] = "random";
+    char *saveptr = NULL;
+    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+        return perror_exit("socket", -1, line_text);
+    /* Initiate connection */
+    if (connect(sock, serverptr, sizeof(struct sockaddr_in)) < 0)
+        return perror_exit("connect", sock, line_text);
+
+    if (read(sock, buf, sizeof(buf)) == -1)
+        return perror_exit("read", sock, line_text);
+    if (strcmp(buf, "SEND NAME PLEASE"))
+    {
+        close(sock);
+        free(line_text);
+        return NULL;
+    }
+    char *response = strtok_r(line_text, " ", &saveptr);
+    char *rest = strtok_r(NULL, " ", &saveptr);
+    char *name = malloc((strlen(response) + 1 + strlen(rest) + 1) * sizeof(char));
+    strcpy(name, response);
+    strcat(name, " ");
+    strcat(name, rest);
+    if (write(sock, name, strlen(name) + 1) == -1)
+    {
+        free(name);
+        return perror_exit("write", sock, line_text);
+    }
+    free(name);
+    if (read(sock, buf, sizeof(buf)) == -1)
+        return perror_exit("read", sock, line_text);
+
+    if (!strcmp(buf, "ALREADY VOTED"))
+    {
+        free(line_text);
+        close(sock);
+        return NULL;
+    }
+    response = strtok_r(NULL, " \n", &saveptr);
+    if (write(sock, response, strlen(response) + 1) == -1)
+        return perror_exit("write", sock, line_text);
+    if (read(sock, buf, sizeof(buf)) == -1)
+        return perror_exit("read", sock, line_text);
+    close(sock);
+    free(line_text);
+    return NULL;
+}
+
+void *perror_exit(char *message, int socket, void *dealloc)
+{ /* Free memory/close socket in case of an error and print message */
     if (dealloc != NULL)
         free(dealloc);
     if (socket > 0)
@@ -71,7 +121,7 @@ void *perror_exit(char *message, int socket, void *dealloc)
 }
 
 void init(waits clients, int buffersize)
-{
+{ /* Initialize struct's contains */
     clients->count = 0;
     clients->buffersize = buffersize;
     clients->head = NULL;
@@ -79,7 +129,7 @@ void init(waits clients, int buffersize)
 }
 
 void add(waits clients, int socket, struct sockaddr *client)
-{
+{ /* Add a client's socket to the end of the waiting list */
     if (clients->count + 1 > clients->buffersize)
     {
         printf("Threw one");
@@ -102,25 +152,8 @@ void add(waits clients, int socket, struct sockaddr *client)
     clients->count++;
 }
 
-void deletes(waits clients)
-{
-    if (clients == NULL)
-        return;
-
-    req current = clients->head, next = NULL;
-    while (current != NULL)
-    {
-        next = current->next;
-        free(current);
-        current = next;
-    }
-    clients->head = NULL;
-    clients->tail = NULL;
-    clients->count = 0;
-}
-
 req pop(waits clients)
-{
+{ /* Pop from the list the client who came first */
     req poped = clients->head;
     if (clients->count == 0)
         return NULL;
@@ -133,10 +166,38 @@ req pop(waits clients)
 
     return poped;
 }
+
+void deletes(waits clients)
+{ /* Deleting all clients waiting */
+    if (clients == NULL)
+        return;
+
+    req current = clients->head, next = NULL;
+    while (current != NULL)
+    {
+        next = current->next;
+        close(current->socket);
+        free(current);
+        current = next;
+    }
+    clients->head = NULL;
+    clients->tail = NULL;
+    clients->count = 0;
+}
+
+name insert(name voters, char *voter)
+{ /* Deleting all the names of the voters */
+    name new = malloc(sizeof(struct names));
+    new->voter = malloc(strlen(voter) * sizeof(char) + 1);
+    strcpy(new->voter, voter);
+    new->next = NULL;
+    if (voters != NULL)
+        new->next = voters;
+    return new;
+}
+
 int search(name voters, char *voter)
-{
-    if (voters == NULL)
-        return 0;
+{ /* Seach for a voter-returns 1 if found/0 if not found */
     while (voters != NULL)
     {
         if (!strcmp(voters->voter, voter))
@@ -145,10 +206,9 @@ int search(name voters, char *voter)
     }
     return 0;
 }
+
 void del(name voters)
-{
-    if (voters == NULL)
-        return;
+{ /* Deleting all voters */
     name current = voters, next = NULL;
     while (current != NULL)
     {
@@ -158,29 +218,9 @@ void del(name voters)
         current = next;
     }
 }
-name insert(name voters, char *voter)
-{
-    name new = malloc(sizeof(struct names));
-    new->voter = malloc(strlen(voter) * sizeof(char) + 1);
-    strcpy(new->voter, voter);
-    new->next = NULL;
-    if (voters != NULL)
-        new->next = voters;
-    return new;
-}
-void print(parties votes)
-{
-    while (votes != NULL)
-    {
-        if (votes->count != -1)
-            fprintf(fdstats, "%s %d\n", votes->party, votes->count);
-        fprintf(fdlog, "%s %s\n", votes->name, votes->party);
 
-        votes = votes->next;
-    }
-}
 parties in(parties votes, char *name, char *party)
-{
+{ /* Insert a vote in the list/Count the votes for each party at the first node the party appears in the list(where count is not -1) */
     parties new = malloc(sizeof(struct Party)), prev, tmp = votes, last;
     int found = 0;
     new->name = malloc(strlen(name) * sizeof(char) + 1);
@@ -215,14 +255,23 @@ parties in(parties votes, char *name, char *party)
         strcpy(new->party, party);
     }
     else
-    {
         new->party = last->party;
-    }
     return votes;
 }
 
+void print(parties votes)
+{ /* Print the proper data to the output files */
+    while (votes != NULL)
+    {
+        if (votes->count != -1)
+            fprintf(fdstats, "%s %d\n", votes->party, votes->count);
+        fprintf(fdlog, "%s %s\n", votes->name, votes->party);
+        votes = votes->next;
+    }
+}
+
 void dele(parties votes)
-{
+{ /* Delete all votes */
     parties current = votes, next;
     while (current != NULL)
     {

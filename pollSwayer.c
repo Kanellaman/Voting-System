@@ -1,56 +1,6 @@
 #include "Interface.h"
 #include "InterfaceClient.h"
 
-void *print_line(void *line)
-{
-    char *line_text = (char *)line;
-    int sock;
-    char buf[1024] = "random";
-    char *saveptr = NULL;
-    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-        return perror_exit("socket", -1, line_text);
-    /* Initiate connection */
-    if (connect(sock, serverptr, sizeof(struct sockaddr_in)) < 0)
-        return perror_exit("connect", sock, line_text);
-
-    if (read(sock, buf, sizeof(buf)) == -1)
-        return perror_exit("read", sock, line_text);
-    if (strcmp(buf, "SEND NAME PLEASE"))
-    {
-        close(sock);
-        free(line_text);
-        return NULL;
-    }
-    char *response = strtok_r(line_text, " ", &saveptr);
-    char *rest = strtok_r(NULL, " ", &saveptr);
-    char *name = malloc((strlen(response) + 1 + strlen(rest) + 1) * sizeof(char));
-    strcpy(name, response);
-    strcat(name, " ");
-    strcat(name, rest);
-    if (write(sock, name, strlen(name) + 1) == -1)
-    {
-        free(name);
-        return perror_exit("write", sock, line_text);
-    }
-    free(name);
-    if (read(sock, buf, sizeof(buf)) == -1)
-        return perror_exit("read", sock, line_text);
-
-    if (!strcmp(buf, "ALREADY VOTED"))
-    {
-        free(line_text);
-        close(sock);
-        return NULL;
-    }
-    response = strtok_r(NULL, " \n", &saveptr);
-    if (write(sock, response, strlen(response) + 1) == -1)
-        return perror_exit("write", sock, line_text);
-    if (read(sock, buf, sizeof(buf)) == -1)
-        return perror_exit("read", sock, line_text);
-    close(sock);
-    free(line_text);
-    return NULL;
-}
 int main(int argc, char **argv)
 {
     pthread_t *thread_id;
@@ -98,7 +48,7 @@ int main(int argc, char **argv)
         fgets(line, sizeof(line), file);
         char *text = malloc(strlen(line) * sizeof(char) + 1);
         strcpy(text, line);
-        if (pthread_create(&thread_id[i], NULL, print_line, text) != 0)
+        if (pthread_create(&thread_id[i], NULL, send_vote, text) != 0)
         {
             printf("Error creating thread.\n");
             fclose(file);
