@@ -47,3 +47,4 @@ If all threads have delivered their vote the program ends.
 
 Note:
 There are no memory leaks!
+The server runs until it receives a SIGINT (Ctrl+C) signal.

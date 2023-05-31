@@ -5,6 +5,10 @@ Author: sdi2000064 - Konstantinos Kanellakis
 ## Summary
 This project implements a server-client application for conducting a pre-election poll. The server, called poller, listens for client connections, receives votes, and stores them in a log file. The client, called pollSwayer, reads a list of voter names and votes from an input file and sends them to the server.
 
+<div id="header" align="center">
+  <img src="https://i.pinimg.com/originals/0e/4a/c3/0e4ac37acbff81cd087aa19692a07a9d.gif" width="100"/>
+</div>
+
 ## How to Run the Application
 
 1. **Compilation/Execution:**
@@ -63,13 +67,13 @@ This project implements a server-client application for conducting a pre-electio
 ## Purpose
 The purpose of this assignment is to familiarize you with system programming in a Unix environment. It involves threading and network communication, specifically implementing a multithreaded server and a client application.
 
-## Problem 1: Multi-threaded network server (50 points)
+## Problem 1: Multi-threaded network server
 The server application, poller, runs a pre-election poll. It accepts connections from clients, receives votes, and stores them in log and stats files.
 
-## Problem 2: Batch client for testing purposes (30 points)
+## Problem 2: Batch client for testing purposes
 The client application, pollSwayer, reads voter names and votes from an input file and sends them to the server for recording.
 
-## Problem 3: Bash scripts (20 points)
+## Problem 3: Bash scripts
 Bash scripts are provided to assist in debugging the program and generating input files. These scripts include create_input.sh, tallyVotes.sh, and processLogFile.sh.
 
-For more details on each problem and the implementation, please refer to the comments in the code files.
+For more details on each problem and the implementation, please refer to the comments in the code files or send me a message.
