@@ -1,4 +1,4 @@
-# Assignment 2 - Server(poller)-Client(pollSwayer) application for vote counting
+<div># Assignment 2 - Server(poller)-Client(pollSwayer) application for vote counting</div>
 
 Author: sdi2000064 - Konstantinos Kanellakis
 
