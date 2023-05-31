@@ -15,20 +15,28 @@ if [ "$2" -le 0 ]; then
   exit 1
 fi
 
-NEW_FILE="input.txt"
+NEW_FILE="inputFile"
 rm -f ${NEW_FILE}
 touch ${NEW_FILE}
-for i in {1..20}; do
+num_lines=$(wc -l < $input)
+for (( j=0; j<$2; j++ )); do
   random_name=""
+  random_surname=""
 
   # Generate a random number within the desired range
   length=$(( RANDOM % (8) + 4 ))
-
   for (( i=0; i<$length; i++ )); do
     random_character=$(echo "$RANDOM" | md5sum | awk '{print substr($1, length($1)-1, 1)}')
     random_name="${random_name}${random_character}"
   done
-  length=$((RANDOM % 11 +1))
+
+  length=$(( RANDOM % (8) + 4 ))
+  for (( i=0; i<$length; i++ )); do
+    random_character=$(echo "$RANDOM" | md5sum | awk '{print substr($1, length($1)-1, 1)}')
+    random_surname="${random_surname}${random_character}"
+  done
+  
+  length=$((RANDOM % $num_lines +1))
   random_party=$(head -n "$length" "$input" | tail -n 1)
-  echo "$random_name $random_party" >> ${NEW_FILE}
+  echo "$random_name $random_surname $random_party" >> ${NEW_FILE}
 done
