@@ -14,7 +14,11 @@ Scripts
     ./tallyVotes.sh inputFile
     ./processLogFile.sh poll-log
 
-There are no memory leaks!
+To check if the results are correct run:
+    cmp pollerResultsFile tallyResultsFile
+    sort -o poll-stats poll-stats
+    cmp tallyResultsFile poll-stats
+
 Programming Design Choices-Server(poller)
 
 The sig_handler function is a signal handler for the SIGINT signal (Ctrl+C). It sets a flag to indicate that the threads should terminate and performs cleanup tasks 
@@ -40,3 +44,6 @@ For every non empty line of the input file a thread is created.
 Each thread is assigned 1 line(vote) of the file and is responsible for it to be delivered to the poller.
 
 If all threads have delivered their vote the program ends.
+
+Note:
+There are no memory leaks!
