@@ -1,4 +1,4 @@
-# <div align="center"> Server(poller)-Client(pollSwayer) application for vote counting - Assignment 2 for Κ24 - System-Programming Semester 2022 - 2023</div>
+# <div align="center"> Server(poller)-Client(pollSwayer) application for vote counting </br> Assignment 2 for Κ24 - System-Programming Semester 2022 - 2023</div>
 
 Author: sdi2000064 - Konstantinos Kanellakis
 
