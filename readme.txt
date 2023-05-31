@@ -9,8 +9,8 @@ For compilation use command:
     make all
 
 For executing use command:
-    ./poller 5634 8 16 poll-log poll-stats
-    ./pollSwayer linux01.di.uoa.gr 5634 inputFile
+    ./poller 9000 8 16 poll-log poll-stats
+    ./pollSwayer linux01.di.uoa.gr 9000 inputFile
 Scripts
     ./create_input.sh politicalParties.txt numLines
     ./tallyVotes.sh inputFile
