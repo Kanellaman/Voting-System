@@ -2,16 +2,16 @@
 CC = gcc
 
 # .c files
-Files1 = poller.c Functions.c
-Files2 = pollSwayer.c Functions.c
+Files1 = poller.c ../modules/Functions.c
+Files2 = pollSwayer.c ../modules/Functions.c
 
 # .o objects
-OBJS1 = poller.o Functions.o
-OBJS2 = pollSwayer.o Functions.o
+OBJS1 = poller.o ../modules/Functions.o
+OBJS2 = pollSwayer.o ../modules/Functions.o
 
 # .h files
-InterfaceServer = InterfaceServer.h Interface.h
-InterfaceClient = InterfaceClient.h Interface.h
+InterfaceServer = ../include/InterfaceServer.h ../include/Interface.h
+InterfaceClient = ../include/InterfaceClient.h ../include/Interface.h
 
 # Executable
 EXEC1 = poller
@@ -39,5 +39,4 @@ memory-pollSwayer: $(EXEC2)
 
 # Clear
 clean:
-	rm -f $(EXEC1) $(OBJS1)
-	rm -f $(EXEC2) $(OBJS2)
+	rm -f $(EXEC1) $(OBJS1) $(EXEC2) $(OBJS2) 

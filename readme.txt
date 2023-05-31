@@ -3,6 +3,8 @@ sdi2000064-Konstantinos Kanellakis
 
 Compilation/Execute
 
+!First run create_input.sh as show below to create the input file for pollSwayer!
+
 For compilation use command:
     make all
 

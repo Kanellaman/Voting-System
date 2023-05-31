@@ -1,5 +1,5 @@
-#include "Interface.h"
-#include "InterfaceServer.h"
+#include "../include/Interface.h"
+#include "../include/InterfaceServer.h"
 
 void sig_handler(int sig)
 {                                  /* Handler of the signal SIGINT- Freeing memory/Printing results/Waiting for gracefully closing of all the threads */

@@ -1,9 +1,9 @@
-#include "Interface.h"
-#include "InterfaceServer.h"
-#include "InterfaceClient.h"
+#include "../include/Interface.h"
+#include "../include/InterfaceServer.h"
+#include "../include/InterfaceClient.h"
 
 void *serve(void *arg)
-{ /* Function for server-threads */
+{ /* Function for server-threads */                                                                                                                                                             
     while (1)
     {
         char name[1024], party[1024]; // Variables to store voter and party

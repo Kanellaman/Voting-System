@@ -1,5 +1,5 @@
-#include "Interface.h"
-#include "InterfaceClient.h"
+#include "../include/Interface.h"
+#include "../include/InterfaceClient.h"
 
 int main(int argc, char **argv)
 {
