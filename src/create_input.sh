@@ -20,19 +20,19 @@ rm -f ${NEW_FILE}
 touch ${NEW_FILE}
 num_lines=$(wc -l < $input)
 for (( j=0; j<$2; j++ )); do
-  random_name=""
-  random_surname=""
-
+  
+  random_name=$(echo "$((RANDOM % 26 + 65))" | awk '{ printf "%c", $0 }')
   # Generate a random number within the desired range
   length=$(( RANDOM % (8) + 4 ))
-  for (( i=0; i<$length; i++ )); do
-    random_character=$(echo "$RANDOM" | md5sum | awk '{print substr($1, length($1)-1, 1)}')
+  for (( i=0; i<$length-1; i++ )); do
+    random_character=$(echo "$((RANDOM % 26 + 97))" | awk '{ printf "%c", $0 }')
     random_name="${random_name}${random_character}"
   done
 
+  random_surname=$(echo "$((RANDOM % 26 + 65))" | awk '{ printf "%c", $0 }')
   length=$(( RANDOM % (8) + 4 ))
-  for (( i=0; i<$length; i++ )); do
-    random_character=$(echo "$RANDOM" | md5sum | awk '{print substr($1, length($1)-1, 1)}')
+  for (( i=0; i<$length-1; i++ )); do
+    random_character=$(echo "$((RANDOM % 26 + 97))" | awk '{ printf "%c", $0 }')
     random_surname="${random_surname}${random_character}"
   done
   
