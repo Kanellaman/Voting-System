@@ -3,7 +3,7 @@
 #include "../include/InterfaceClient.h"
 
 void *serve(void *arg)
-{ /* Function for server-threads */                                                                                                                                                             
+{ /* Function for server-threads */
     while (1)
     {
         char name[1024], party[1024]; // Variables to store voter and party
@@ -250,11 +250,14 @@ parties in(parties votes, char *party)
 
 void print(parties votes)
 { /* Print the proper data to the output files */
+    int total = 0;
     while (votes != NULL)
     {
         fprintf(fdstats, "%s %d\n", votes->party, votes->count);
+        total += votes->count;
         votes = votes->next;
     }
+    fprintf(fdstats, "TOTAL %d\n", total);
 }
 
 void dele(parties votes)

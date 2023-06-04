@@ -18,8 +18,6 @@ Scripts
 
 To check if the results are correct run:
     cmp pollerResultsFile tallyResultsFile
-    sort -o poll-stats poll-stats
-    cmp tallyResultsFile poll-stats
 
 Programming Design Choices-Server(poller)
 
