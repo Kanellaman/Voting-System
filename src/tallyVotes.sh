@@ -16,6 +16,7 @@ names="name_temp"
 parties="tallyResultsFile"
 rm -f ${names};touch ${names}
 rm -f ${parties};touch ${parties}
+total=0 # Total number of votes
 # Traverse every line of the input file (Even the last line)
 for ((line_number=1; line_number<num_lines+2; line_number++)); do
     # Read the line with proper format
@@ -28,7 +29,7 @@ for ((line_number=1; line_number<num_lines+2; line_number++)); do
     matching_lines=$(grep -x "$full_name" "$names") # Explicitly find the same name line by line
     if [ -z "$matching_lines" ]; then
         echo $full_name >> $names
-    else
+    else    # Skip the person if he/she has already voted
         continue
     fi
     # Get the line in which the party appears in the file $parties (if it does appear)
@@ -45,6 +46,8 @@ for ((line_number=1; line_number<num_lines+2; line_number++)); do
         new_str="$party $counter"
         sed -i "${i}s/.*/${new_str}/" "$parties" # Update the vote counter in the file
     fi
+    ((total++))
 done < "$input"
+echo "TOTAL $total" >> "$parties"
 sort -o $parties $parties
 rm -f ${names};

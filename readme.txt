@@ -18,7 +18,9 @@ Scripts
 
 To check if the results are correct run:
     cmp pollerResultsFile tallyResultsFile
-
+You can also run to check poll-stats file:
+    sort -o poll-stats poll-stats
+    cmp pollerResultsFile poll-stats
 Programming Design Choices-Server(poller)
 
 The sig_handler function is a signal handler for the SIGINT signal (Ctrl+C). It sets a flag to indicate that the threads should terminate and performs cleanup tasks 
