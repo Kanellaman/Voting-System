@@ -25,7 +25,7 @@ Programming Design Choices-Server(poller)
 
 The sig_handler function is a signal handler for the SIGINT signal (Ctrl+C). It sets a flag to indicate that the threads should terminate and performs cleanup tasks 
 such as freeing memory, printing results, closing file descriptors, and destroying mutexes and condition variables.
-It is important to note that only the main thread receivs the SIGINT signal and handles it and NOT the threads.
+It is important to note that only the master thread (main function) handles the SIGINT signal and NOT the threads.
 
 There has been used 3 mutexes and 2 condition variables.
 The purpose of condition variable buff is to prevent main thread accept any more requests while the buffer is full.

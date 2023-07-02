@@ -191,7 +191,7 @@ void deletes(waits clients)
 }
 
 name insert(name voters, char *voter)
-{ /* Deleting all the names of the voters */
+{ /* Inserting a voter */
     name new = malloc(sizeof(struct names));
     new->voter = malloc(strlen(voter) * sizeof(char) + 1);
     strcpy(new->voter, voter);
