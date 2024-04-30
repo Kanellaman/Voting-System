@@ -1,3 +1,6 @@
+#ifndef INTERFACESERVER_H
+#define INTERFACESERVER_H
+
 /* Server header file */
 typedef struct Request *req;
 typedef struct waiting *waits;
@@ -29,20 +32,20 @@ struct Party
 };
 
 /* Mutexes/Condtion Variables/Thread variable */
-pthread_mutex_t mutex;
-pthread_mutex_t mutex1;
-pthread_mutex_t mutex2;
-pthread_cond_t buff;
-pthread_cond_t cond;
-pthread_t *thread_id;
+extern pthread_mutex_t mutex;
+extern pthread_mutex_t mutex1;
+extern pthread_mutex_t mutex2;
+extern pthread_cond_t buff;
+extern pthread_cond_t cond;
+extern  pthread_t *thread_id;
 
-int sock, threads, flag;
-FILE *fdlog, *fdstats; // Input-Output files
+extern int sock, threads, flag;
+extern FILE *fdlog, *fdstats; // Input-Output files
 
 /* Ckeck typedefs and structs' comments */
-struct waiting clients;
-name voters;
-parties votes;
+extern struct waiting clients;
+extern name voters;
+extern parties votes;
 
 /* Functions needed-Implemented in Functions.c */
 void *serve(void *rank);
@@ -59,3 +62,5 @@ void del(name votes);
 parties in(parties votes, char *party);
 void print(parties votes);
 void dele(parties votes);
+
+#endif

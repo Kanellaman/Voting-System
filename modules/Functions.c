@@ -2,6 +2,27 @@
 #include "../include/InterfaceServer.h"
 #include "../include/InterfaceClient.h"
 
+/* Server variables */
+pthread_mutex_t mutex;
+pthread_mutex_t mutex1;
+pthread_mutex_t mutex2;
+pthread_cond_t buff;
+pthread_cond_t cond;
+pthread_t *thread_id;
+
+int sock, threads, flag;
+FILE *fdlog, *fdstats;
+
+struct waiting clients;
+name voters;
+parties votes;
+
+/* Swayer variables */
+int port;
+char *votes_file;
+struct sockaddr_in server;
+struct sockaddr *serverptr;
+struct hostent *rem;
 void *serve(void *arg)
 { /* Function for server-threads */
     while (1)
