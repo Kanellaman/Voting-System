@@ -2,16 +2,16 @@
 CC = gcc
 
 # .c files
-Files1 = poller.c ../modules/Functions.c
-Files2 = pollSwayer.c ../modules/Functions.c
+Files1 = src/poller.c modules/Functions.c
+Files2 = src/pollSwayer.c modules/Functions.c
 
 # .o objects
-OBJS1 = poller.o ../modules/Functions.o
-OBJS2 = pollSwayer.o ../modules/Functions.o
+OBJS1 = src/poller.o modules/Functions.o
+OBJS2 = src/pollSwayer.o modules/Functions.o
 
 # .h files
-InterfaceServer = ../include/InterfaceServer.h ../include/Interface.h
-InterfaceClient = ../include/InterfaceClient.h ../include/Interface.h
+InterfaceServer = include/InterfaceServer.h include/Interface.h
+InterfaceClient = include/InterfaceClient.h include/Interface.h
 
 # Executable
 EXEC1 = poller
