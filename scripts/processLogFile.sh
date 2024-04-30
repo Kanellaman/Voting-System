@@ -2,7 +2,7 @@
 #
 if [ "$#" -ne 1 ]; then
   echo "Error: One argument is required."
-  echo "Usage: ./tallyVotes.sh tallyResultsFile"
+  echo "Usage: ./tallyVotes.sh /path/to/tallyResultsFile"
   exit 1
 fi
 input="$1"
@@ -13,7 +13,7 @@ fi
 num_lines=$(wc -l < "$input") # Get the number of lines of the input file
 # Delete previous files and create new
 names="name_temp"
-parties="pollerResultsFile"
+parties="../pollerResultsFile"
 rm -f ${names};touch ${names}
 rm -f ${parties};touch ${parties}
 total=0 # Total number of votes

@@ -15,7 +15,7 @@ if [ "$2" -le 0 ]; then
   exit 1
 fi
 
-NEW_FILE="inputFile"
+NEW_FILE="../inputFile"
 rm -f ${NEW_FILE}
 touch ${NEW_FILE}
 num_lines=$(wc -l < $input)
